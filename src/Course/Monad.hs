@@ -18,12 +18,12 @@ import qualified Prelude as P((=<<))
 --
 -- * The law of associativity
 --   `∀f g x. g =<< (f =<< x) ≅ ((g =<<) . f) =<< x`
-class Applicative k => Monad k where
+class Applicative f => Monad f where
   -- Pronounced, bind.
   (=<<) ::
-    (a -> k b)
-    -> k a
-    -> k b
+    (a -> f b)
+    -> f a
+    -> f b
 
 infixr 1 =<<
 
@@ -155,9 +155,9 @@ infixl 1 >>=
 -- >>> ((\n -> n :. n :. Nil) <=< (\n -> n+1 :. n+2 :. Nil)) 1
 -- [2,2,3,3]
 (<=<) ::
-  Monad k =>
-  (b -> k c)
-  -> (a -> k b)
+  Monad f =>
+  (b -> f c)
+  -> (a -> f b)
   -> a
   -> f c
 f <=< g =

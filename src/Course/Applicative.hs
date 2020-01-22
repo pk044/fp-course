@@ -322,8 +322,8 @@ lift1 = (<$>)
 -- [60,8]
 sequence ::
   Applicative f                      =>
-  List (k a)
-  -> k (List a)
+  List (f a)
+  -> f (List a)
 sequence =
   foldRight (lift2 (:.)) (pure Nil)
 
@@ -374,7 +374,7 @@ replicateA n = sequence . replicate n
 --
 filtering ::
   Applicative f                      =>
-  (a -> k Bool)
+  (a -> f Bool)
   -> List a
   -> f (List a)
 filtering p = foldRight(\a -> lift2 (\b -> if b then (a:.) else id) (p a)) (pure Nil)
@@ -392,21 +392,21 @@ instance Applicative IO where
 return ::
   Applicative f                       =>
   a
-  -> k a
+  -> f a
 return =
   pure
 
 fail ::
   Applicative f                        =>
   Chars
-  -> k a
+  -> f a
 fail =
   error . hlist
 
 (>>) ::
   Applicative f                         =>
-  k a
-  -> k b
-  -> k b
+  f a
+  -> f b
+  -> f b
 (>>) =
   (*>)
