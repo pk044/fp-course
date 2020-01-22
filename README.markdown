@@ -69,7 +69,7 @@ however, your first post might be moderated. This is simply to prevent spam.
 instead. [Instructions](ops/README.md) for automatically building a virtual machine are
 available in this repository for your convenience.
 
-1. Install the Glasgow Haskell Compiler (GHC) version 7.10 or higher.
+1. Install the Glasgow Haskell Compiler (GHC) version 8.0 or higher.
 
 2. Change to the directory containing this document.
 
@@ -152,8 +152,9 @@ available in this repository for your convenience.
    on following the types, you will develop more trust in the potential paths
    that they can take you, including identification of false paths.
 
-   Your instructor must guide you where types fall short, but you should also
-   take the first step. Do it.
+   Where types fall short, use the tests written in comments above each exercise.
+   They can be copied and pasted into GHCi. You should also take the first step
+   of following the types. Do it.
 
 5. Do not use tab characters
 
@@ -165,76 +166,37 @@ available in this repository for your convenience.
 
 ### Running the tests
 
-Tests are stored under the `test/` directory. Each module from the course that
+Tests are stored under the `src/Test/` directory. Each module from the course that
 has tests has a corresponding `<MODULE>Test.hs` file. Within each test module,
 tests for each function are grouped using the `testGroup` function. Within each
 test group there are test cases (`testCase` function), and properties
 (`testProperty` function).
 
-Tests are able to be run using either a built-in test runner that has no
-requirement beyond those of the course (a supported version of GHCi), or
-[tasty](https://hackage.haskell.org/package/tasty).
+Tests are run using a built-in test runner that has no requirements
+beyond those of the course (a supported version of GHCi). By default,
+the full test suite is loaded, and each module's tests are
+exported. You can run the tests in GHCi like this:
 
-**NOTE**: If running tests using the embedded runner, no property tests will be
-run.
+    >> test test_List
 
-#### Built-in runner
+#### Specific modules
 
-Each test module exports a function called `courseTest` that may be used to run tests. To run
-tests, load the relevant module, and then run `courseTest <tests>`. For example, in `GHCi`:
+For convenience, each test module also exports the `test` function. To
+run tests from a single module, load it, and then run `test
+<tests>`. For example, in `GHCi`:
 
-    λ> :l test/Course/ListTest.hs
-    λ> courseTest test_List
-    λ> courseTest productTest
+    >> :l test/Course/ListTest.hs
+    >> courseTest test_List
 
-Alternatively, the full test suite may be run by loading `test/TestLoader.hs` and running
-`courseTest tests`.
-
-#### tasty
-
-Before running the tests, ensure that you have an up-to-date installation
-of GHC and cabal-install from your system package manager or use the minimal
-installers found at [haskell.org](https://www.haskell.org/downloads#minimal).
-
-To run the full test suite, build the project as follows:
-
-    > cabal update
-    > cabal install --only-dependencies --enable-tests
-    > cabal configure --enable-tests
-    > cabal build
-    > cabal test
-
-Tasty will also allow you to run only those tests whose description match a
-pattern. Tests are organised in nested groups named after the relevant module
-and function, so pattern matching should be intuitive. For example, to run the
-tests for the `List` module you could run:
-
-    > cabal test tasty --show-detail=direct --test-option=--pattern="Tests.List."
-
-Likewise, to run only the tests for the `headOr` function in the `List` module, you could use:
-
-    > cabal test tasty --show-detail=direct --test-option=--pattern="List.headOr"
-
-In addition, GHCi may be used to run tests using tasty. Assuming you have run `ghci`
-from the root of the project, you may do the following. Remember that GHCi has
-tab completion, so you can save yourself some typing.
-
-    λ> -- Load the tasty test runner and tests
-    λ> :l test/TastyLoader.hs
-    λ>
-    λ> -- Tests may be referenced by module
-    λ> tastyTest ListTest.headOrTest
-    λ> tastyTest OptionalTest.valueOrTest
-    λ> tastyTest tests
+    -- This is a single test
+    >> courseTest productTest
 
 #### `:reload` and run tests
 
-In addition there are custom `:courseTest` and `:tastyTest` commands defined
-in `.ghci` that will invoke `:reload` and then `courseTest` or `tastyTest`.
+There is also a custom `:test` command defined in `.ghci` that will
+invoke `:reload` and then `test` in a single action:
 
-For example:
-
-    λ> :tastyTest List.test_List
+    >> :test test_List
 
 #### doctest
 
@@ -244,8 +206,8 @@ GHCI. Examples begin with `>>>` while properties begin with `prop>`.
 
 ### Progression
 
-It is recommended to perform some exercises before others. The first step is to
-inspect the introduction modules.
+We recommend you perform some exercises before others. The first step
+is to inspect the introduction modules.
 
 * `Course.ExactlyOne`
 * `Course.Validation`
@@ -254,7 +216,7 @@ They contain examples of data structures and Haskell syntax. They do not contain
 exercises and exist to provide a cursory examination of Haskell syntax. The next
 step is to complete the exercises in `Course.Optional`.
 
-After this, the following progression of modules is recommended:
+After this, we recommend the following progression of modules:
 
 <!-- * `Course.List` -->
 <!-- * `Course.Functor` -->
@@ -291,45 +253,6 @@ Answers for the exercises can be found here:
 
 After these are completed, complete the exercises in the `projects` directory.
 
-### Leksah
-
-If you choose to use the [Leksah IDE for Haskell](http://leksah.org/), the
-following tips are recommended:
-
-* [Install Leksah from github](https://github.com/leksah/leksah#getting-leksah).
-  If you are using Nix to install Leksah launch it with `./leksah-nix.sh ghc822`
-  as the Nix files for this course use GHC 8.2.2.
-* Clone this fp-course git repo use File -> Open Project to open the cabal.project file.
-* Mouse over the toolbar items near the middle of toolbar to see the names of them.
-  Set the following items on/off:
-  * `Build in the background and report errors` ON - unless you prefer to triger builds
-     manualy with Ctrl + B to build (Command + B on OS X)
-  * `Use GHC to compile` ON
-  * `Use GHCJS to compile` OFF
-  * `Use GHCi debugger to build and run` ON
-  * `Make documentation while building` OFF
-  * `Run unit tests when building` ON
-  * `Run benchmakrs when building` OFF
-  * `Make dependent packages` ON
-* If you are using Nix, click on the nix button on the toolbar (tool tip is "Refresh
-  Leksah's cached nix environment variables for the active project").  This will use
-  `nix-shell` to build an environment for running the builds in.  If `nix-shell` has
-  not been run before for the `fp-course` repo it may take some time to complete.
-  When it is finished a line of green '-' characters should be printed in the Panes -> Log.
-* Restart Leksah as there is a bug in the metadata collection that
-  will prevent it from indexing the new project without a restart.
-* Ctrl + B to build (Command + B on OS X).
-* The test failures should show up in Panes -> Errors.
-* Pane -> Log often has useful error messages.
-* Ctrl + J (Command + J on OS X) selects the next item in
-  Errors pane and goes to it in the source (hold down Shift
-  to go to previous item).
-* Ctrl + Enter on a line starting "-- >>>" will run the
-  selected expression in GHCi (Ctrl + Enter on OS X too).
-  The output goes to Panes -> Log (on Linux it will also show up in Panes -> Output).
-* The last GHCi expression is reevaluated after each :reload
-  triggered by changes in the code.
-
 ### Introducing Haskell
 
 This section is a guide for the instructor to introduce Haskell syntax. Each of
@@ -340,7 +263,7 @@ these points should be covered before attempting the exercises.
   * The `->` in a type signature is *right-associative*
 * functions are values
 * functions take arguments
-  * functions take *only one argument* but we approximate without spoken
+  * functions take *only one argument* but we approximate with spoken
     language
   * functions can be declared inline using *lambda expressions*
   * the `\` symbol in a lambda expression denotes a Greek lambda
@@ -393,8 +316,6 @@ covered first.
 * type parameters
   * always lower-case 'a'..'z'
   * aka generics, templates C++, parametric polymorphism
-* running the tests
-  * `cabal test`
 
 ### Parser grammar assistance
 

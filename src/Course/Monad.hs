@@ -18,12 +18,12 @@ import qualified Prelude as P((=<<))
 --
 -- * The law of associativity
 --   `∀f g x. g =<< (f =<< x) ≅ ((g =<<) . f) =<< x`
-class Applicative f => Monad f where
+class Applicative k => Monad k where
   -- Pronounced, bind.
   (=<<) ::
-    (a -> f b)
-    -> f a
-    -> f b
+    (a -> k b)
+    -> k a
+    -> k b
 
 infixr 1 =<<
 
@@ -150,14 +150,14 @@ a >>= f = join (f <$> a)
 infixl 1 >>=
 
 -- | Implement composition within the @Monad@ environment.
--- Pronounced, kleisli composition.
+-- Pronounced, Kleisli composition.
 --
 -- >>> ((\n -> n :. n :. Nil) <=< (\n -> n+1 :. n+2 :. Nil)) 1
 -- [2,2,3,3]
 (<=<) ::
-  Monad f =>
-  (b -> f c)
-  -> (a -> f b)
+  Monad k =>
+  (b -> k c)
+  -> (a -> k b)
   -> a
   -> f c
 f <=< g =

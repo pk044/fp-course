@@ -27,13 +27,13 @@ import qualified Prelude as P(fmap, return, (>>=))
 -- * The law of interchange
 --   `∀u y. u <*> pure y = pure ($ y) <*> u`
 
-class Functor f => Applicative f where
+class Functor k => Applicative k where
   pure ::
-    a -> f a
+    a -> k a
   (<*>) ::
-    f (a -> b)
-    -> f a
-    -> f b
+    k (a -> b)
+    -> k a
+    -> k b
 
 infixl 4 <*>
 
@@ -152,7 +152,7 @@ instance Applicative ((->) t) where
 -- >>> lift2 (+) length sum (listh [4,5,6])
 -- 18
 lift2 ::
-  Applicative f =>
+  Applicative k =>
   (a -> b -> c)
   -> f a
   -> f b
@@ -183,7 +183,7 @@ lift2 f a b = f <$> a <*> b
 -- >>> lift3 (\a b c -> a + b + c) length sum product (listh [4,5,6])
 -- 138
 lift3 ::
-  Applicative f =>
+  Applicative k =>
   (a -> b -> c -> d)
   -> f a
   -> f b
@@ -215,7 +215,7 @@ lift3 f a b c = lift2 f a b <*> c
 -- >>> lift4 (\a b c d -> a + b + c + d) length sum product (sum . filter even) (listh [4,5,6])
 -- 148
 lift4 ::
-  Applicative f =>
+  Applicative k =>
   (a -> b -> c -> d -> e)
   -> f a
   -> f b
@@ -225,12 +225,14 @@ lift4 ::
 lift4 f a b c d =
   lift3 f a b c <*> d
 
+
 -- | Apply a nullary function in the environment.
 lift0 ::
-  Applicative f =>
+  Applicative k =>
   a
   -> f a
 lift0 = pure
+
 
 -- | Apply a unary function in the environment.
 -- /can be written using `lift0` and `(<*>)`./
@@ -244,11 +246,12 @@ lift0 = pure
 -- >>> lift1 (+1) (1 :. 2 :. 3 :. Nil)
 -- [2,3,4]
 lift1 ::
-  Applicative f =>
+  Applicative k =>
   (a -> b)
   -> f a
   -> f b
 lift1 = (<$>)
+
 
 -- | Apply, discarding the value of the first argument.
 -- Pronounced, right apply.
@@ -274,6 +277,7 @@ lift1 = (<$>)
   -> f b
   -> f b
 (*>) = lift2 (const id)
+
 
 -- | Apply, discarding the value of the second argument.
 -- Pronounced, left apply.
@@ -317,9 +321,9 @@ lift1 = (<$>)
 -- >>> sequence ((*10) :. (+2) :. Nil) 6
 -- [60,8]
 sequence ::
-  Applicative f =>
-  List (f a)
-  -> f (List a)
+  Applicative k =>
+  List (k a)
+  -> k (List a)
 sequence =
   foldRight (lift2 (:.)) (pure Nil)
 
@@ -342,7 +346,7 @@ sequence =
 -- >>> replicateA 3 ('a' :. 'b' :. 'c' :. Nil)
 -- ["aaa","aab","aac","aba","abb","abc","aca","acb","acc","baa","bab","bac","bba","bbb","bbc","bca","bcb","bcc","caa","cab","cac","cba","cbb","cbc","cca","ccb","ccc"]
 replicateA ::
-  Applicative f =>
+  Applicative k =>
   Int
   -> f a
   -> f (List a)
@@ -369,8 +373,8 @@ replicateA n = sequence . replicate n
 -- [[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]]
 --
 filtering ::
-  Applicative f =>
-  (a -> f Bool)
+  Applicative k =>
+  (a -> k Bool)
   -> List a
   -> f (List a)
 filtering p = foldRight(\a -> lift2 (\b -> if b then (a:.) else id) (p a)) (pure Nil)
@@ -386,23 +390,23 @@ instance Applicative IO where
     f P.>>= \f' -> P.fmap f' a
 
 return ::
-  Applicative f =>
+  Applicative k =>
   a
-  -> f a
+  -> k a
 return =
   pure
 
 fail ::
-  Applicative f =>
+  Applicative k =>
   Chars
-  -> f a
+  -> k a
 fail =
   error . hlist
 
 (>>) ::
-  Applicative f =>
-  f a
-  -> f b
-  -> f b
+  Applicative k =>
+  k a
+  -> k b
+  -> k b
 (>>) =
   (*>)
